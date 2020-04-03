@@ -110,9 +110,14 @@ def cross_validation_train(X_train_val, y_train_val, clf, parameter_grid, cv_tec
 if __name__ == "__main__":
     print('------ import dataset ------')
     # filepath = '../dataset/data.csv'
-    filepath = os.path.join('C:' + os.sep + 'data' + os.sep + 'data.csv')
-    X, y = import_data(filepath)
+    #filepath = os.path.join('C:' + os.sep + 'data' + os.sep + 'data.csv')
+    #X, y = import_data(filepath)
     #X, y = make_moons(n_samples=1000, noise=0.1)
+    filepath = os.path.join('C:' + os.sep + 'data' + os.sep + 'X_short.csv')
+    X = pd.read_csv(filepath)
+    filepath = os.path.join('C:' + os.sep + 'data' + os.sep + 'y_short.csv')
+    y = pd.read_csv(filepath)
+    print(X.shape)
     print('------ split into training set and test set ------')
     X_train_val, X_test, y_train_val, y_test = train_test_split(X, y, test_size=0.2)
     print('------ train classifier ------')
