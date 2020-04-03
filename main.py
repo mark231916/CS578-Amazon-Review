@@ -123,6 +123,7 @@ if __name__ == "__main__":
     y = np.ravel(y.to_numpy())
     print(X.shape)
     print(y.shape)
+    # Randomize data
     p = np.random.permutation(len(y))
     X = X[p]
     y = y[p]
