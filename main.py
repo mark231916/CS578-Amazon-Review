@@ -122,8 +122,8 @@ if __name__ == "__main__":
     filepath = os.path.join('C:' + os.sep + 'data' + os.sep + 'y.csv')
     y = pd.read_csv(filepath, index_col=None)
     y = np.ravel(y.to_numpy())
-    print(X.shape)
-    print(y.shape)
+    #print(X.shape)
+    #print(y.shape)
     # Randomize data
     p = np.random.permutation(len(y))
     X = X[p]
@@ -134,7 +134,7 @@ if __name__ == "__main__":
     print('------ train classifier ------')
     clf = get_SVC()
     cv_technique = 'bootstrap'
-    B = 100
+    B = 5
     metric = 'accuracy'
     Cs = [0.001, 0.01, 0.1, 1, 10]
     kernels = ['linear', 'rbf']
@@ -145,4 +145,6 @@ if __name__ == "__main__":
                                                                          metric=metric)
     # model performance on the test set
     test_score = test_classifier(X_test, y_test, clf, metrics='accuracy')
+    print('Best parameter: ', best_param)
+    print('Best score: ', best_score)
     print('test score: ', test_score)
