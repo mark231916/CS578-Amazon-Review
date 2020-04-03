@@ -133,7 +133,7 @@ if __name__ == "__main__":
     print('------ train classifier ------')
     clf = get_SVC()
     cv_technique = 'bootstrap'
-    B = 5
+    B = 100
     metric = 'accuracy'
     Cs = [0.001, 0.01, 0.1, 1, 10]
     kernels = ['linear', 'rbf']
