@@ -15,7 +15,7 @@ def import_data(filepath):
     data = pd.read_csv(filepath)
     y = data['label']
     X = data.drop(columns=['label'])
-    # shuffle X and y
+    # shuffle X and y 
     p = np.random.permutation(len(y))
     X = X[p]
     y = y[p]
@@ -115,13 +115,11 @@ if __name__ == "__main__":
     #filepath = os.path.join('C:' + os.sep + 'data' + os.sep + 'data.csv')
     #X, y = import_data(filepath)
     #X, y = make_moons(n_samples=1000, noise=0.1)
-    filepath = os.path.join('C:' + os.sep + 'data' + os.sep + 'X_short.csv')
+    filepath = os.path.join('C:' + os.sep + 'data' + os.sep + 'X.csv')
     X = pd.read_csv(filepath, index_col=None)
-    X.pop('Unnamed: 0')
     X = X.to_numpy()
-    filepath = os.path.join('C:' + os.sep + 'data' + os.sep + 'y_short.csv')
+    filepath = os.path.join('C:' + os.sep + 'data' + os.sep + 'y.csv')
     y = pd.read_csv(filepath, index_col=None)
-    y.pop('Unnamed: 0')
     y = np.ravel(y.to_numpy())
     print(X.shape)
     print(y.shape)
