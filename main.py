@@ -1,13 +1,20 @@
 from sklearn.model_selection import train_test_split
 from sklearn.svm import LinearSVC, SVC
+from itertools import product
+import numpy as np
+import math
+import pandas as pd
+from random import choices
 
 
-def preprocess(filepath):
-    # input:
-    #     filepath: a path string of the dataset
-    # output:
-    #     X: a 2000*m Pandas Dataframe
-    #     y: a 2000*1 Pandas Series
+def import_data(filepath):
+    data = pd.read_csv(filepath)
+    y = data['label']
+    X = data.drop(columns=['label'])
+    # shuffle X and y
+    p = np.random.permutation(len(y))
+    X = X[p]
+    y = y[p]
     return X, y
 
 
@@ -22,9 +29,7 @@ def train_classifier(X_train, y_train, clf):
     # input:
     #     X_train, y_train: training set
     #     clf: a sklearn classifier, SVM or NN or LR
-    # output:
-    #     clf: a trained classifier
-    return clf
+    pass
 
 
 def test_classifier(X_test, y_test, clf, metrics='accuracy'):
@@ -37,36 +42,84 @@ def test_classifier(X_test, y_test, clf, metrics='accuracy'):
     return score
 
 
-def cross_validation_score(X_train, y_train, clf, cv=5, metric='accuracy'):
-    # input:
-    #     X, y: training set
-    #     clf: a sklearn classifier, SVM or NN or LR
-    #     cv: number of folds
-    #     metrics: 'accuracy' or 'precision' or 'recall' or 'roc_auc' or ...
-    # output:
-    #     average_score: mean of a list of scores get from test_classifier().
-    return average_score
+def kfold_score(X_train_val, y_train_val, clf, k=5, metric='accuracy'):
+    total_size = X.shape[0]
+    val_size = math.floor(total_size / k)
+    cv_scores = []
+    for round in range(k):
+        if round == k - 1:
+            indices = range(round * val_size, total_size)
+        else:
+            indices = range(round * val_size, (round + 1) * val_size)
+        X_val = X_train_val[indices]
+        y_val = y_train_val[indices]
+        X_train = X_train_val[~indices]
+        y_train = y_train_val[~indices]
+        train_classifier(X_train, y_train, clf)
+        cv_scores.append(test_classifier(X_val, y_val, clf, metric))
+    return sum(cv_scores) / k
 
 
-def cross_validation_train(X_train, y_train, clf, parameter_grid, cv=5, metric='accuracy'):
+def bootstrap_socre(X_train_val, y_train_val, B=5, model='SVM', metric='accuracy'):
+    n = len(y_train_val) # number of training samples
+    bs_scores = [] # bootstrap scores
+    for round in range(B):
+        indices = choices(range(n), k=n) # pick n samples with replacement
+        X_train = X_train_val[indices]
+        y_train = y_train_val[indices]
+        X_val = X_train_val[~list(set(indices))]
+        y_val = y_train_val[~list(set(indices))]
+        train_classifier(X_train, y_train, clf)
+        bs_scores.append(test_classifier(X_val, y_val, clf, metric))
+    return sum(bs_scores) / B # return the average score
+
+
+def cross_validation_train(X_train_val, y_train_val, clf, parameter_grid, cv_technique='k-fold', k=5, B=5, metric='accuracy'):
+    # computes the cartesian product of parameter_grid
+    items = sorted(parameter_grid.items())
+    keys, values = zip(*items)
+    grid = []
+    for v in product(*values):
+        grid.append(dict(zip(keys, v)))
+    # iterate over parameter_grid
+    params, scores, best_score, best_params = [], [], -1, None
+    for idx, param in enumerate(grid):
+        print('running {}/{} in parameter grid ...'.format(idx + 1, len(grid)))
+        clf.set_params(**param) # set the classifier's hyperparameter to the current parameter
+        # if technique='k-fold', then use k-fold cross validation
+        if (cv_technique == 'k-fold'):
+            score = kfold_score(X_train_val, y_train_val, clf, k=k, metric=metric)
+        elif (cv_technique == 'bootstrap'):
+            score = bootstrap_socre(X_train_val, y_train_val, clf, B=B, metric=metric)
+        print('cv score: {}'.format(score))
+        params.append(param)
+        scores.append(score)
+        if (score > best_score):
+            best_score = score
+            best_param = param
+    clf.set_params(**best_param)
+    train_classifier(X_train_val, y_train_val, clf)
     return clf, params, scores, best_param, best_score
 
 
-def bootstrap_socre(X, y, B=5, model='SVM', metric='accuracy'):
-    return average_score
-
 
 if __name__ == "__main__":
-    # preprocess data
-    filepath = 'dataset/books/'
-    X, y = preprocess(filepath)
-    # train_test_split
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+    # import data
+    filepath = '../dataset/data.csv'
+    X, y = import_data(filepath)
+    # split into training set and test set
+    X_train_val, X_test, y_train_val, y_test = train_test_split(X, y, test_size=0.2)
     # initialize classifier
     clf = get_SVC()
     # cross validation train
+    cv_technique = 'k-fold'
+    k = 5
     metric = 'accuracy'
-    cv = 5
-    clf, params, scores, best_param, best_score = cross_validation_train(X_train, y_train, clf, cv=cv, metric=metric)
+    Cs = [0.001, 0.01, 0.1, 1, 10]
+    kernels = ['linear', 'rbf']
+    parameter_grid = {'C': Cs, 'kernel': kernels}
+    clf, params, scores, best_param, best_score = cross_validation_train(X_train_val, y_train_val, clf,
+                                                                         parameter_grid, cv_technique=cv_technique,
+                                                                         k=k, metric=metric)
     # model performance on the test set
     test_score = test_classifier(X_test, y_test, clf, metrics='accuracy')
