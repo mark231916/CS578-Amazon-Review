@@ -1,5 +1,7 @@
 from sklearn.model_selection import train_test_split
 from sklearn.svm import LinearSVC, SVC
+from sklearn.metrics import accuracy_score
+from sklearn.datasets import make_moons
 from itertools import product
 import numpy as np
 import math
@@ -29,7 +31,7 @@ def train_classifier(X_train, y_train, clf):
     # input:
     #     X_train, y_train: training set
     #     clf: a sklearn classifier, SVM or NN or LR
-    pass
+    clf.fit(X_train, y_train)
 
 
 def test_classifier(X_test, y_test, clf, metrics='accuracy'):
@@ -39,36 +41,37 @@ def test_classifier(X_test, y_test, clf, metrics='accuracy'):
     #     metrics: 'accuracy' or 'precision' or 'recall' or 'roc_auc' or ...
     # output:
     #     score: performance score on the test set
-    return score
+    y_pred = clf.predict(X_test)
+    return accuracy_score(y_test, y_pred)
 
 
 def kfold_score(X_train_val, y_train_val, clf, k=5, metric='accuracy'):
-    total_size = X.shape[0]
-    val_size = math.floor(total_size / k)
+    n = len(y_train_val) # number of training samples
+    val_size = math.floor(n / k)
     cv_scores = []
     for round in range(k):
         if round == k - 1:
-            indices = range(round * val_size, total_size)
+            indices = range(round * val_size, n)
         else:
             indices = range(round * val_size, (round + 1) * val_size)
         X_val = X_train_val[indices]
         y_val = y_train_val[indices]
-        X_train = X_train_val[~indices]
-        y_train = y_train_val[~indices]
+        X_train = np.delete(X_train_val, indices, axis=0)
+        y_train = np.delete(y_train_val, indices, axis=0)
         train_classifier(X_train, y_train, clf)
         cv_scores.append(test_classifier(X_val, y_val, clf, metric))
     return sum(cv_scores) / k
 
 
-def bootstrap_socre(X_train_val, y_train_val, B=5, model='SVM', metric='accuracy'):
+def bootstrap_socre(X_train_val, y_train_val, clf, B=5, metric='accuracy'):
     n = len(y_train_val) # number of training samples
     bs_scores = [] # bootstrap scores
     for round in range(B):
         indices = choices(range(n), k=n) # pick n samples with replacement
         X_train = X_train_val[indices]
         y_train = y_train_val[indices]
-        X_val = X_train_val[~list(set(indices))]
-        y_val = y_train_val[~list(set(indices))]
+        X_val = np.delete(X_train_val, list(set(indices)), axis=0)
+        y_val = np.delete(y_train_val, list(set(indices)), axis=0)
         train_classifier(X_train, y_train, clf)
         bs_scores.append(test_classifier(X_val, y_val, clf, metric))
     return sum(bs_scores) / B # return the average score
@@ -104,22 +107,24 @@ def cross_validation_train(X_train_val, y_train_val, clf, parameter_grid, cv_tec
 
 
 if __name__ == "__main__":
-    # import data
-    filepath = '../dataset/data.csv'
-    X, y = import_data(filepath)
-    # split into training set and test set
+    print('------ import dataset ------')
+    # filepath = '../dataset/data.csv'
+    # X, y = import_data(filepath)
+    X, y = make_moons(n_samples=1000, noise=0.1)
+    print('------ split into training set and test set ------')
     X_train_val, X_test, y_train_val, y_test = train_test_split(X, y, test_size=0.2)
-    # initialize classifier
+    print('------ train classifier ------')
     clf = get_SVC()
-    # cross validation train
-    cv_technique = 'k-fold'
-    k = 5
+    cv_technique = 'bootstrap'
+    B = 5
     metric = 'accuracy'
     Cs = [0.001, 0.01, 0.1, 1, 10]
     kernels = ['linear', 'rbf']
     parameter_grid = {'C': Cs, 'kernel': kernels}
+    print('------ training ------')
     clf, params, scores, best_param, best_score = cross_validation_train(X_train_val, y_train_val, clf,
                                                                          parameter_grid, cv_technique=cv_technique,
-                                                                         k=k, metric=metric)
+                                                                         metric=metric)
     # model performance on the test set
     test_score = test_classifier(X_test, y_test, clf, metrics='accuracy')
+    print('test score: ', test_score)
