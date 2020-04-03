@@ -123,6 +123,9 @@ if __name__ == "__main__":
     y = np.ravel(y.to_numpy())
     print(X.shape)
     print(y.shape)
+    p = np.random.permutation(len(y))
+    X = X[p]
+    y = y[p]
     print('------ split into training set and test set ------')
     X_train_val, X_test, y_train_val, y_test = train_test_split(X, y, test_size=0.2)
     #print(X_train_val)
