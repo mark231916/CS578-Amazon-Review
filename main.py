@@ -91,6 +91,7 @@ def cross_validation_train(X_train_val, y_train_val, clf, parameter_grid, cv_tec
     params, scores, best_score, best_params = [], [], -1, None
     for idx, param in enumerate(grid):
         print('running {}/{} in parameter grid ...'.format(idx + 1, len(grid)))
+        print('C = {}, kernel = {}'.format(param.get('C'), param.get('kernel')))
         clf.set_params(**param) # set the classifier's hyperparameter to the current parameter
         # if technique='k-fold', then use k-fold cross validation
         if (cv_technique == 'k-fold'):
