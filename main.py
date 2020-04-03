@@ -5,6 +5,7 @@ import numpy as np
 import math
 import pandas as pd
 from random import choices
+import os
 
 
 def import_data(filepath):
@@ -105,7 +106,7 @@ def cross_validation_train(X_train_val, y_train_val, clf, parameter_grid, cv_tec
 
 if __name__ == "__main__":
     # import data
-    filepath = '../dataset/data.csv'
+    filepath = os.path.join('C:' + os.sep + 'data' + os.sep + 'data.csv')
     X, y = import_data(filepath)
     # split into training set and test set
     X_train_val, X_test, y_train_val, y_test = train_test_split(X, y, test_size=0.2)
