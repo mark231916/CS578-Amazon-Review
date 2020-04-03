@@ -65,7 +65,7 @@ def kfold_score(X_train_val, y_train_val, clf, k=5, metric='accuracy'):
     return sum(cv_scores) / k
 
 
-def bootstrap_socre(X_train_val, y_train_val, clf, B=5, metric='accuracy'):
+def bootstrap_score(X_train_val, y_train_val, clf, B=5, metric='accuracy'):
     n = len(y_train_val) # number of training samples
     bs_scores = [] # bootstrap scores
     for round in range(B):
@@ -96,7 +96,7 @@ def cross_validation_train(X_train_val, y_train_val, clf, parameter_grid, cv_tec
         if (cv_technique == 'k-fold'):
             score = kfold_score(X_train_val, y_train_val, clf, k=k, metric=metric)
         elif (cv_technique == 'bootstrap'):
-            score = bootstrap_socre(X_train_val, y_train_val, clf, B=B, metric=metric)
+            score = bootstrap_score(X_train_val, y_train_val, clf, B=B, metric=metric)
         print('cv score: {}'.format(score))
         params.append(param)
         scores.append(score)
