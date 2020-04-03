@@ -8,6 +8,7 @@ import math
 import pandas as pd
 from random import choices
 import os
+import random
 
 
 def import_data(filepath):
@@ -69,6 +70,7 @@ def bootstrap_socre(X_train_val, y_train_val, clf, B=5, metric='accuracy'):
     bs_scores = [] # bootstrap scores
     for round in range(B):
         indices = choices(range(n), k=n) # pick n samples with replacement
+        #indices = random.sample(range(n), n)
         X_train = X_train_val[indices]
         y_train = y_train_val[indices]
         X_val = np.delete(X_train_val, list(set(indices)), axis=0)
@@ -114,12 +116,18 @@ if __name__ == "__main__":
     #X, y = import_data(filepath)
     #X, y = make_moons(n_samples=1000, noise=0.1)
     filepath = os.path.join('C:' + os.sep + 'data' + os.sep + 'X_short.csv')
-    X = pd.read_csv(filepath)
+    X = pd.read_csv(filepath, index_col=None)
+    X.pop('Unnamed: 0')
+    X = X.to_numpy()
     filepath = os.path.join('C:' + os.sep + 'data' + os.sep + 'y_short.csv')
-    y = pd.read_csv(filepath)
+    y = pd.read_csv(filepath, index_col=None)
+    y.pop('Unnamed: 0')
+    y = np.ravel(y.to_numpy())
     print(X.shape)
+    print(y.shape)
     print('------ split into training set and test set ------')
     X_train_val, X_test, y_train_val, y_test = train_test_split(X, y, test_size=0.2)
+    #print(X_train_val)
     print('------ train classifier ------')
     clf = get_SVC()
     cv_technique = 'bootstrap'
