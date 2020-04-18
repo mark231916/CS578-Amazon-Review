@@ -2,6 +2,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.svm import LinearSVC, SVC
 from sklearn.metrics import accuracy_score
 from sklearn.datasets import make_moons
+from sklearn.neural_network import MLPClassifier
 from itertools import product
 import numpy as np
 import math
@@ -91,7 +92,11 @@ def cross_validation_train(X_train_val, y_train_val, clf, parameter_grid, cv_tec
     params, scores, best_score, best_params = [], [], -1, None
     for idx, param in enumerate(grid):
         print('running {}/{} in parameter grid ...'.format(idx + 1, len(grid)))
-        print('C = {}, kernel = {}'.format(param.get('C'), param.get('kernel')))
+        if (isinstance(clf, SVC)):
+            print('C = {}, kernel = {}'.format(param.get('C'), param.get('kernel')))
+        elif (isinstance(clf,MLPClassifier)):
+            print('num of hidden layer = {}, num of neuron = {}, solver = {}'.format(len(param.get('hidden_layer_sizes')), 
+                    param.get('hidden_layer_sizes')[0], param.get('solver')))
         clf.set_params(**param) # set the classifier's hyperparameter to the current parameter
         # if technique='k-fold', then use k-fold cross validation
         if (cv_technique == 'k-fold'):
@@ -116,10 +121,11 @@ if __name__ == "__main__":
     #filepath = os.path.join('C:' + os.sep + 'data' + os.sep + 'data.csv')
     #X, y = import_data(filepath)
     #X, y = make_moons(n_samples=1000, noise=0.1)
-    filepath = os.path.join('C:' + os.sep + 'data' + os.sep + 'X.csv')
+
+    filepath = "dataset/X.csv"
     X = pd.read_csv(filepath, index_col=None)
     X = X.to_numpy()
-    filepath = os.path.join('C:' + os.sep + 'data' + os.sep + 'y.csv')
+    filepath = "dataset/y.csv"
     y = pd.read_csv(filepath, index_col=None)
     y = np.ravel(y.to_numpy())
     #print(X.shape)
@@ -131,7 +137,7 @@ if __name__ == "__main__":
     print('------ split into training set and test set ------')
     X_train_val, X_test, y_train_val, y_test = train_test_split(X, y, test_size=0.2)
     #print(X_train_val)
-    print('------ train classifier ------')
+    """ print('------ train classifier ------')
     clf = get_SVC()
     cv_technique = 'bootstrap'
     B = 5
@@ -139,6 +145,23 @@ if __name__ == "__main__":
     Cs = [0.001, 0.01, 0.1, 1, 10]
     kernels = ['linear', 'rbf']
     parameter_grid = {'C': Cs, 'kernel': kernels}
+    print('------ training ------')
+    clf, params, scores, best_param, best_score = cross_validation_train(X_train_val, y_train_val, clf,
+                                                                         parameter_grid, cv_technique=cv_technique,
+                                                                         metric=metric)
+    # model performance on the test set
+    test_score = test_classifier(X_test, y_test, clf, metrics='accuracy')
+    print('Best parameter: ', best_param)
+    print('Best score: ', best_score)
+    print('test score: ', test_score) """
+
+    print('------ train neural network ------')
+    clf = MLPClassifier()
+    cv_technique = 'k-fold'
+    metric = 'accuracy'
+    layers = [(30,), (30,30), (30,30,30), (50,), (50, 50), (50,50,50), (100,), (100,100), (100,100,100)]
+    kernels = ['lbfgs']
+    parameter_grid = {'hidden_layer_sizes': layers, 'solver': kernels}
     print('------ training ------')
     clf, params, scores, best_param, best_score = cross_validation_train(X_train_val, y_train_val, clf,
                                                                          parameter_grid, cv_technique=cv_technique,
