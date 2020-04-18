@@ -159,9 +159,11 @@ if __name__ == "__main__":
     clf = MLPClassifier()
     cv_technique = 'k-fold'
     metric = 'accuracy'
-    layers = [(30,), (30,30), (30,30,30), (50,), (50, 50), (50,50,50), (100,), (100,100), (100,100,100)]
+    layers = [(10,), (10,10), (10,10,10), (50,), (50, 50), (50,50,50), 
+    (100,), (100,100), (100,100,100), (200,), (200, 200), (200,200,200)]
     kernels = ['lbfgs']
-    parameter_grid = {'hidden_layer_sizes': layers, 'solver': kernels}
+    random_state = [42]
+    parameter_grid = {'hidden_layer_sizes': layers, 'solver': kernels, 'random_state': random_state}
     print('------ training ------')
     clf, params, scores, best_param, best_score = cross_validation_train(X_train_val, y_train_val, clf,
                                                                          parameter_grid, cv_technique=cv_technique,
