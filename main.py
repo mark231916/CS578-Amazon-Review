@@ -137,7 +137,7 @@ if __name__ == "__main__":
     print('------ split into training set and test set ------')
     X_train_val, X_test, y_train_val, y_test = train_test_split(X, y, test_size=0.2)
     #print(X_train_val)
-    """ print('------ train classifier ------')
+    print('------ train classifier ------')
     clf = get_SVC()
     cv_technique = 'bootstrap'
     B = 5
@@ -153,7 +153,7 @@ if __name__ == "__main__":
     test_score = test_classifier(X_test, y_test, clf, metrics='accuracy')
     print('Best parameter: ', best_param)
     print('Best score: ', best_score)
-    print('test score: ', test_score) """
+    print('test score: ', test_score)
 
     print('------ train neural network ------')
     clf = MLPClassifier()
