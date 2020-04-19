@@ -86,7 +86,6 @@ def Tune_hyperparameter(clf,params,X,y,k,thres):
         clf.fit(X_train,y_train)
         if not thres:
             pred=clf.predict(X_val)
-            pred=np.array(pred).reshape((-1,1))
             params_history[keys[0]]+=[param.get(keys[0])]
             params_history[keys[1]]+=[param.get(keys[1])]
             params_history['Accuracy']+=[sum(pred==y_val)/len(y_val)]
