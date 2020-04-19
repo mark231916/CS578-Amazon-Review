@@ -13,6 +13,9 @@ import collections
 from itertools import product
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+from sklearn.svm import LinearSVC, SVC
+import math
+import pandas as pd
 
 def Tune_batchsize(samplesize,clf,X,y):
     Accuracy,sample=[],[]
@@ -34,11 +37,22 @@ def Tune_batchsize(samplesize,clf,X,y):
             accu+=sum(pred==y_val.flatten())/len(pred)
         Accuracy+=[accu/k]
         sample+=[k]
-    plt.plot(sample,accuracy)
+    plt.plot(sample,Accuracy)
     plt.xlabel('k fold')
     plt.ylabel('Accuracy')
-    plt.title('Accuracy vs Different Number of K value')   
+    plt.title('Accuracy vs Different Number of K value') 
+    plt.show()
 
+
+filepath = "dataset/X.csv"
+X = pd.read_csv(filepath, index_col=None)
+X = X.to_numpy()
+filepath = "dataset/y.csv"
+y = pd.read_csv(filepath, index_col=None)
+y = np.ravel(y.to_numpy())
+p = np.random.permutation(len(y))
+X = X[p]
+y = y[p]
 samplesize=range(5,10)
 clf=SVC(random_state=0,kernel='rbf',C=1.0)
 Tune_batchsize(samplesize,clf,X,y)        
@@ -96,10 +110,11 @@ def plotting(x,y,z,xlabel,ylabel,title):
     ax = plt.axes(projection='3d')
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
-    ax.set_zlabel('Accuracy');
+    ax.set_zlabel('Accuracy')
     #ax.contour3D(X, Y, Z, 50,cmap='viridis')
-    ax.plot_surface(X, Y, Z, rstride=1, cstride=1,cmap='viridis');
-    ax.set_title(title);
+    ax.plot_surface(X, Y, Z, rstride=1, cstride=1,cmap='viridis')
+    ax.set_title(title)
+    ax.show()
 ##Plot the tuning for logistic regression   
 lg_x=range(len(lg_params['C']));lg_y=range(len(lg_params['penalty']));lg_z=np.array(lg_history['Accuracy'])
 lg_xlabel='C';lg_ylabel='Penalty';lg_title='Accuracy vs Hyperparameters Tuning for Logistic Regression'
