@@ -218,7 +218,7 @@ if __name__ == "__main__":
     #######logisticRegression
     print('-------Train LogisticRegression ------')
     lg_params={'penalty':['l1','l2', 'elasticnet'],'C':np.logspace(-3,-0.5,20)}
-    lg_history=Tune_hyperparameter(LogisticRegression(solver='saga',l1_ratio=0.5),lg_params,X,y,2,thres=False)
+    lg_history=Tune_hyperparameter(LogisticRegression(solver='saga',l1_ratio=0.5),lg_params,X,y,5,thres=False)
     print('-------Plotting Hyperparameters vs Accuracy for LogisticRegression---')
     svm_x=range(len(svm_params['kernel']));svm_y=range(len(svm_params['thres']));svm_z=np.array(svm_history['Accuracy'])
     svm_xlabel='Kernel';svm_ylabel='Threshold';svm_title='Accuracy vs Hyperparameters Tuning for SVM'
@@ -226,7 +226,7 @@ if __name__ == "__main__":
     #######SVM
     print('-------Train SVM-----')
     svm_params={'kernel':['linear', 'rbf'],'thres':np.linspace(0.2,0.7,30)}
-    svm_history=Tune_hyperparameter(SVC(C=1.0,probability=True,ganna='auto'),svm_params,X,y,2,thres=True)
+    svm_history=Tune_hyperparameter(SVC(C=1.0,probability=True,ganna='auto'),svm_params,X,y,5,thres=True)
     print('-------Plotting Hyperparameters vs Accuracy for SVM--')
     svm_x=range(len(svm_params['kernel']));svm_y=range(len(svm_params['thres']));svm_z=np.array(svm_history['Accuracy'])
     svm_xlabel='Kernel';svm_ylabel='Threshold';svm_title='Accuracy vs Hyperparameters Tuning for SVM'
