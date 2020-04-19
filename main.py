@@ -226,7 +226,7 @@ if __name__ == "__main__":
     #######SVM
     print('-------Train SVM-----')
     svm_params={'kernel':['linear', 'rbf'],'thres':np.linspace(0.2,0.7,30)}
-    svm_history=Tune_hyperparameter(SVC(C=1.0,probability=True,ganna='auto'),svm_params,X,y,5,thres=True)
+    svm_history=Tune_hyperparameter(SVC(C=1.0,probability=True,gamma='auto'),svm_params,X,y,5,thres=True)
     print('-------Plotting Hyperparameters vs Accuracy for SVM--')
     svm_x=range(len(svm_params['kernel']));svm_y=range(len(svm_params['thres']));svm_z=np.array(svm_history['Accuracy'])
     svm_xlabel='Kernel';svm_ylabel='Threshold';svm_title='Accuracy vs Hyperparameters Tuning for SVM'
