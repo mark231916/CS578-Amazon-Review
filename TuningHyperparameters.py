@@ -56,9 +56,7 @@ def Tune_hyperparameter(clf,params,X,y,k,thres):
     # iterate over parameter_grid
     params_history =collections.defaultdict(list)
     for idx, param in enumerate(grid):
-        print(idx,param)
         print('running {}/{} in parameter grid ...'.format(idx + 1, len(grid)))
-        #print('C = {}, penalty = {}'.format(param.get(keys[0]), param.get(keys[1])))
         clf.set_params(**param) # set the classifier's hyperparameter to the current parameter
         n = len(y) # number of training samples
         val_size = math.floor(n / k)
