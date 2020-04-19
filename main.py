@@ -1,6 +1,5 @@
 from sklearn.model_selection import train_test_split
 from sklearn.svm import LinearSVC, SVC
-from sklearn.metrics import accuracy_score
 from sklearn.datasets import make_moons
 from sklearn.neural_network import MLPClassifier
 from itertools import product
@@ -10,7 +9,11 @@ import pandas as pd
 from random import choices
 import os
 import random
-
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LogisticRegression
+import collections
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 def import_data(filepath):
     data = pd.read_csv(filepath)
@@ -117,6 +120,80 @@ def cross_validation_train(X_train_val, y_train_val, clf, parameter_grid, cv_tec
     train_classifier(X_train_val, y_train_val, clf)
     return clf, params, scores, best_param, best_score
 
+def kfold_withthres(X_train_val, y_train_val, clf, k,threshold):
+    n = len(y_train_val) # number of training samples
+    val_size = math.floor(n / k)
+    cv_scores = []
+    for round in range(k):
+        if round == k - 1:
+            indices = range(round * val_size, n)
+        else:
+            indices = range(round * val_size, (round + 1) * val_size)
+        X_val = X_train_val[indices]
+        y_val = y_train_val[indices]
+        X_train = np.delete(X_train_val, indices, axis=0)
+        y_train = np.delete(y_train_val, indices, axis=0)
+        clf.fit(X_train,y_train)
+        pred=(clf.predict_proba(X_val)[:,1]>threshold)*1
+        cv_scores.append(get_accuracy(y_val,pred))
+    return sum(cv_scores) / k
+
+
+def Tune_batchsize(size,clf,X,y):
+    error_his,size_his=[],[]
+    for i,k in enumerate(size):
+        print('running {}/{} in batchsize grid ...'.format(i+1, len(size)))
+        accuracy=kfold_score(X, y, clf, k, metric='accuracy')
+        error_his+=[1-accuracy]
+        size_his+=[k]
+    plt.plot(size_his,error_his)
+    plt.xlabel('k fold')
+    plt.ylabel('Error of Validation set')
+    plt.title('Error vs Different Number of K choice') 
+    plt.show()
+
+ 
+def Tune_hyperparameter(clf,params,X,y,k,thres):
+    if thres:
+        thres_grid=params['thres']
+        params={keys:v for keys,v in svm_params.items() if keys!='thres'}
+    items = sorted(params.items())
+    keys, values = zip(*items)
+    grid = []
+    for v in product(*values):
+        grid.append(dict(zip(keys, v)))    
+    # iterate over parameter_grid
+    params_history =collections.defaultdict(list)
+    for idx, param in enumerate(grid):
+        print(idx,param)
+        print('running {}/{} in parameter grid ...'.format(idx + 1, len(grid)))
+        clf.set_params(**param) # set the classifier's hyperparameter to the current parameter
+        n = len(y) # number of training samples
+        val_size = math.floor(n / k)
+        if thres: # tune the threshold 
+            for i, threshold in enumerate(thres_grid):
+                print('running {}/{} in thres_grid ...'.format(i+1, len(thres_grid)))
+                accuracy=kfold_withthres(X, y, clf, k,threshold)
+                params_history['Threshold']+=[threshold]
+                params_history['Accuracy']+=[accuracy]
+        else: 
+            accuracy=kfold_score(X, y, clf, k, metric='accuracy')
+            params_history[keys[1]]+=[param.get(keys[1])]
+            params_history[keys[0]]+=[param.get(keys[0])]
+            params_history['Accuracy']+=[accuracy]
+            
+    return params_history
+
+def plotting(x,y,z,xlabel,ylabel,title):
+    print(z.shape)
+    Z=z.reshape((len(y),len(x)))
+    X, Y = np.meshgrid(x, y)
+    ax = plt.axes(projection='3d')
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    ax.set_zlabel('Accuracy');
+    ax.plot_surface(X, Y, Z, rstride=1, cstride=1,cmap='viridis');
+    ax.set_title(title);
 
 
 if __name__ == "__main__":
@@ -138,27 +215,30 @@ if __name__ == "__main__":
     p = np.random.permutation(len(y))
     X = X[p]
     y = y[p]
-    print('------ split into training set and test set ------')
-    X_train_val, X_test, y_train_val, y_test = train_test_split(X, y, test_size=0.2)
-    #print(X_train_val)
-    print('------ train classifier ------')
-    clf = get_SVC()
-    cv_technique = 'bootstrap'
-    B = 5
-    metric = 'accuracy'
-    Cs = [0.001, 0.01, 0.1, 1, 10]
-    kernels = ['linear', 'rbf']
-    parameter_grid = {'C': Cs, 'kernel': kernels}
-    print('------ training ------')
-    clf, params, scores, best_param, best_score = cross_validation_train(X_train_val, y_train_val, clf,
-                                                                         parameter_grid, cv_technique=cv_technique,
-                                                                         metric=metric)
-    # model performance on the test set
-    test_score = test_classifier(X_test, y_test, clf, metrics='accuracy')
-    print('Best parameter: ', best_param)
-    print('Best score: ', best_score)
-    print('test score: ', test_score)
-
+    #######logisticRegression
+    print('-------Train LogisticRegression ------')
+    lg_params={'penalty':['l1','l2', 'elasticnet'],'C':np.logspace(-3,-0.5,20)}
+    lg_history=Tune_hyperparameter(LogisticRegression(solver='saga',l1_ratio=0.5),lg_params,X,y,2,thres=False)
+    print('-------Plotting Hyperparameters vs Accuracy for LogisticRegression---')
+    svm_x=range(len(svm_params['kernel']));svm_y=range(len(svm_params['thres']));svm_z=np.array(svm_history['Accuracy'])
+    svm_xlabel='Kernel';svm_ylabel='Threshold';svm_title='Accuracy vs Hyperparameters Tuning for SVM'
+    plotting(svm_x,svm_y,svm_z,svm_xlabel,svm_ylabel,svm_title)
+    #######SVM
+    print('-------Train SVM-----')
+    svm_params={'kernel':['linear', 'rbf'],'thres':np.linspace(0.2,0.7,30)}
+    svm_history=Tune_hyperparameter(SVC(C=1.0,probability=True,ganna='auto'),svm_params,X,y,2,thres=True)
+    print('-------Plotting Hyperparameters vs Accuracy for SVM--')
+    svm_x=range(len(svm_params['kernel']));svm_y=range(len(svm_params['thres']));svm_z=np.array(svm_history['Accuracy'])
+    svm_xlabel='Kernel';svm_ylabel='Threshold';svm_title='Accuracy vs Hyperparameters Tuning for SVM'
+    plotting(svm_x,svm_y,svm_z,svm_xlabel,svm_ylabel,svm_title)
+    
+    #######Batchsize
+    print('-------Batchsize vs Error-----')
+    size=range(3,15,2)
+    clf=SVC(random_state=0,kernel='rbf',C=1.0,gamma='auto')
+    Tune_batchsize(samplesize,clf,X,y)  
+    
+    ##### Neural Network
     print('------ train neural network ------')
     clf = MLPClassifier()
     cv_technique = 'k-fold'
