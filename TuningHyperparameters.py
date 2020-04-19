@@ -55,7 +55,7 @@ X = X[p]
 y = y[p]
 samplesize=range(5,10)
 clf=SVC(random_state=0,kernel='rbf',C=1.0)
-#Tune_batchsize(samplesize,clf,X,y)        
+Tune_batchsize(samplesize,clf,X,y)        
 
     
 def Tune_hyperparameter(clf,params,X,y,k,thres):
