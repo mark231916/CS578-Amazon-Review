@@ -29,6 +29,10 @@ def get_SVC(C=1.0, kernel="linear"):
                probability=True,
                C=C)
 
+def get_accuracy(y_test, y_pred):
+    temp = y_test[y_test == y_pred]
+    return len(temp) / len(y_test)
+
 
 def train_classifier(X_train, y_train, clf):
     # input:
@@ -45,7 +49,7 @@ def test_classifier(X_test, y_test, clf, metrics='accuracy'):
     # output:
     #     score: performance score on the test set
     y_pred = clf.predict(X_test)
-    return accuracy_score(y_test, y_pred)
+    return get_accuracy(y_test, y_pred)
 
 
 def kfold_score(X_train_val, y_train_val, clf, k=5, metric='accuracy'):
