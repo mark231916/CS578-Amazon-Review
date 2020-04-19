@@ -97,7 +97,6 @@ def plotting(x,y,z,xlabel,ylabel,title):
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
     ax.set_zlabel('Accuracy');
-    #ax.contour3D(X, Y, Z, 50,cmap='viridis')
     ax.plot_surface(X, Y, Z, rstride=1, cstride=1,cmap='viridis');
     ax.set_title(title);
 ##Plot the tuning for logistic regression   
