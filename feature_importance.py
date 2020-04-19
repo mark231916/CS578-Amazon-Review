@@ -33,18 +33,18 @@ def permutation_importance(clf, X_test, y_test, feature_indices, n_repeats=5):
             y_test_pred = clf.predict(X_test_temp)
             # feature importance score is the baseline accuracy minus accuracy of the shuffled dataset
             scores.append(abs(baseline - accuracy_score(y_test, y_test_pred)))
-        print(feature_names[f_idx], scores)
+        #print(feature_names[f_idx], scores)
         imp.append(scores)
     return np.array(imp)
 
 
 # import dataset
 print('------ import dataset ------')
-filepath = os.path.join('../dataset/X.csv')
+filepath = os.path.join('dataset/X.csv')
 X = pd.read_csv(filepath, index_col=None)
 feature_names = X.columns.values
 X = X.to_numpy()
-filepath = os.path.join('../dataset/y.csv')
+filepath = os.path.join('dataset/y.csv')
 y = pd.read_csv(filepath, index_col=None)
 y = np.ravel(y.to_numpy())
 # split into training set and test set
@@ -54,7 +54,7 @@ X_train_val, X_test, y_train_val, y_test = train_test_split(X, y, test_size=0.2)
 
 print('------ svm ------')
 # load model
-clf = pickle.load(open('../dataset/svm.pkl', 'rb'))
+clf = pickle.load(open('dataset/svm.pkl', 'rb'))
 # permutation feature importance
 feature_indices = (-X.sum(axis=0)).argsort()[: int(X.shape[1] * 0.01)]  # only compute for the top 1%-frequent word
 feature_imp = permutation_importance(clf, X_test, y_test, feature_indices, n_repeats=10)
@@ -81,7 +81,7 @@ df_svm_builtin.to_csv('built-in_importance_svm.csv', index=False)
 
 
 print('------ nn ------')
-clf = pickle.load(open('../dataset/nn.pkl', 'rb'))
+clf = pickle.load(open('dataset/nn.pkl', 'rb'))
 feature_indices = (-X.sum(axis=0)).argsort()[: int(X.shape[1] * 0.01)]  # only compute for the top 1%-frequent word
 feature_imp = permutation_importance(clf, X_test, y_test, feature_indices, n_repeats=10)
 
@@ -102,7 +102,7 @@ df_nn_perm.to_csv('perm_importance_nn.csv', index=False)
 
 
 print('------ lr ------')
-clf = pickle.load(open('../dataset/lr.pkl', 'rb'))
+clf = pickle.load(open('dataset/lr.pkl', 'rb'))
 feature_indices = (-X.sum(axis=0)).argsort()[: int(X.shape[1] * 0.01)]  # only compute for the top 1%-frequent word
 feature_imp = permutation_importance(clf, X_test, y_test, feature_indices, n_repeats=10)
 
