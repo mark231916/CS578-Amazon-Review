@@ -55,7 +55,7 @@ X = X[p]
 y = y[p]
 samplesize=range(5,10)
 clf=SVC(random_state=0,kernel='rbf',C=1.0)
-Tune_batchsize(samplesize,clf,X,y)        
+#Tune_batchsize(samplesize,clf,X,y)        
 
     
 def Tune_hyperparameter(clf,params,X,y,k,thres):
@@ -97,8 +97,8 @@ def Tune_hyperparameter(clf,params,X,y,k,thres):
                 params_history['Accuracy']+=[sum(pred==y_val.flatten())/len(y_val)]
     return params_history
 ##Tuning of logistic regression
-#lg_params={'penalty':['l1','l2', 'elasticnet'],'C':np.logspace(-3,-0.5,20)}
-#lg_history=Tune_hyperparameter(LogisticRegression(solver='saga',l1_ratio=0.5),lg_params,X,y,5,thres=False)
+lg_params={'penalty':['l1','l2', 'elasticnet'],'C':np.logspace(-3,-0.5,20)}
+lg_history=Tune_hyperparameter(LogisticRegression(solver='saga',l1_ratio=0.5),lg_params,X,y,5,thres=False)
 
 ## Tuning of SVM model
 svm_params={'kernel':['linear', 'rbf'],'thres':np.linspace(0.2,0.7,30)}
@@ -113,11 +113,12 @@ def plotting(x,y,z,xlabel,ylabel,title):
     ax.set_zlabel('Accuracy')
     ax.plot_surface(X, Y, Z, rstride=1, cstride=1,cmap='viridis')
     ax.set_title(title)
+    plt.show()
 
 ##Plot the tuning for logistic regression   
-#lg_x=range(len(lg_params['C']));lg_y=range(len(lg_params['penalty']));lg_z=np.array(lg_history['Accuracy'])
-#lg_xlabel='C';lg_ylabel='Penalty';lg_title='Accuracy vs Hyperparameters Tuning for Logistic Regression'
-#plotting(lg_x,lg_y,lg_z,lg_xlabel,lg_ylabel,lg_title)
+lg_x=range(len(lg_params['C']));lg_y=range(len(lg_params['penalty']));lg_z=np.array(lg_history['Accuracy'])
+lg_xlabel='C';lg_ylabel='Penalty';lg_title='Accuracy vs Hyperparameters Tuning for Logistic Regression'
+plotting(lg_x,lg_y,lg_z,lg_xlabel,lg_ylabel,lg_title)
 ## plot the tuning for SVM 
 svm_x=range(len(svm_params['kernel']));svm_y=range(len(svm_params['thres']));svm_z=np.array(svm_history['Accuracy'])
 svm_xlabel='Kernel';svm_ylabel='Threshold';svm_title='Accuracy vs Hyperparameters Tuning for SVM'
