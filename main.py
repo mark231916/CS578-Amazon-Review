@@ -97,6 +97,7 @@ def cross_validation_train(X_train_val, y_train_val, clf, parameter_grid, cv_tec
         grid.append(dict(zip(keys, v)))
     # iterate over parameter_grid
     params, scores, best_score, best_params = [], [], -1, None
+    params_history =collections.defaultdict(list)
     for idx, param in enumerate(grid):
         print('running {}/{} in parameter grid ...'.format(idx + 1, len(grid)))
         if (isinstance(clf, SVC)):
@@ -113,12 +114,15 @@ def cross_validation_train(X_train_val, y_train_val, clf, parameter_grid, cv_tec
         print('cv score: {}'.format(score))
         params.append(param)
         scores.append(score)
+        params_history['Num of layers']+=[len(param.get('hidden_layer_sizes'))]
+        params_history['Num of neurons']+=[param.get('hidden_layer_sizes')[0]]
+        params_history['Accuracy']+=[score]
         if (score > best_score):
             best_score = score
             best_param = param
     clf.set_params(**best_param)
     train_classifier(X_train_val, y_train_val, clf)
-    return clf, params, scores, best_param, best_score
+    return clf, params, scores, best_param, best_score, params_history
 
 def kfold_withthres(X_train_val, y_train_val, clf, k,threshold):
     n = len(y_train_val) # number of training samples
@@ -150,13 +154,13 @@ def Tune_batchsize(size,clf,X,y):
     plt.xlabel('k fold')
     plt.ylabel('Error of Validation set')
     plt.title('Error vs Different Number of K choice') 
-    plt.show()
+    plt.savefig('Error vs Different Number of K choice.png')
 
  
 def Tune_hyperparameter(clf,params,X,y,k,thres):
     if thres:
         thres_grid=params['thres']
-        params={keys:v for keys,v in svm_params.items() if keys!='thres'}
+        params={keys:v for keys,v in params.items() if keys!='thres'}
     items = sorted(params.items())
     keys, values = zip(*items)
     grid = []
@@ -191,9 +195,10 @@ def plotting(x,y,z,xlabel,ylabel,title):
     ax = plt.axes(projection='3d')
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
-    ax.set_zlabel('Accuracy');
-    ax.plot_surface(X, Y, Z, rstride=1, cstride=1,cmap='viridis');
-    ax.set_title(title);
+    ax.set_zlabel('Accuracy')
+    ax.plot_surface(X, Y, Z, rstride=1, cstride=1,cmap='viridis')
+    ax.set_title(title)
+    plt.savefig(title +'.png')
 
 
 if __name__ == "__main__":
@@ -216,13 +221,13 @@ if __name__ == "__main__":
     X = X[p]
     y = y[p]
     #######logisticRegression
-    print('-------Train LogisticRegression ------')
+    """ print('-------Train LogisticRegression ------')
     lg_params={'penalty':['l1','l2', 'elasticnet'],'C':np.logspace(-3,-0.5,20)}
     lg_history=Tune_hyperparameter(LogisticRegression(solver='saga',l1_ratio=0.5),lg_params,X,y,5,thres=False)
     print('-------Plotting Hyperparameters vs Accuracy for LogisticRegression---')
-    svm_x=range(len(svm_params['kernel']));svm_y=range(len(svm_params['thres']));svm_z=np.array(svm_history['Accuracy'])
-    svm_xlabel='Kernel';svm_ylabel='Threshold';svm_title='Accuracy vs Hyperparameters Tuning for SVM'
-    plotting(svm_x,svm_y,svm_z,svm_xlabel,svm_ylabel,svm_title)
+    lg_x=range(len(lg_params['C']));lg_y=range(len(lg_params['penalty']));lg_z=np.array(lg_history['Accuracy'])
+    lg_xlabel='C';lg_ylabel='Penalty';lg_title='Accuracy vs Hyperparameters Tuning for Logistic Regression'
+    plotting(lg_x,lg_y,lg_z,lg_xlabel,lg_ylabel,lg_title) """
     #######SVM
     print('-------Train SVM-----')
     svm_params={'kernel':['linear', 'rbf'],'thres':np.linspace(0.2,0.7,30)}
@@ -234,12 +239,13 @@ if __name__ == "__main__":
     
     #######Batchsize
     print('-------Batchsize vs Error-----')
-    size=range(3,15,2)
+    samplesize=range(3,15,2)
     clf=SVC(random_state=0,kernel='rbf',C=1.0,gamma='auto')
-    Tune_batchsize(samplesize,clf,X,y)  
+    Tune_batchsize(samplesize,clf,X,y)
     
     ##### Neural Network
     print('------ train neural network ------')
+    X_train_val, X_test, y_train_val, y_test = train_test_split(X, y, test_size=0.2)
     clf = MLPClassifier()
     cv_technique = 'k-fold'
     metric = 'accuracy'
@@ -249,7 +255,7 @@ if __name__ == "__main__":
     random_state = [42]
     parameter_grid = {'hidden_layer_sizes': layers, 'solver': kernels, 'random_state': random_state}
     print('------ training ------')
-    clf, params, scores, best_param, best_score = cross_validation_train(X_train_val, y_train_val, clf,
+    clf, params, scores, best_param, best_score, nn_history = cross_validation_train(X_train_val, y_train_val, clf,
                                                                          parameter_grid, cv_technique=cv_technique,
                                                                          metric=metric)
     # model performance on the test set
@@ -257,3 +263,7 @@ if __name__ == "__main__":
     print('Best parameter: ', best_param)
     print('Best score: ', best_score)
     print('test score: ', test_score)
+    print('-------Plotting Hyperparameters vs Accuracy for Neural Network--')
+    nn_x=[1, 2, 3];nn_y=[10, 50, 100, 200];nn_z=np.array(nn_history['Accuracy'])
+    nn_xlabel='Num of layers';nn_ylabel='Num of neurons';nn_title='Accuracy vs Hyperparameters Tuning for Neural Network'
+    plotting(nn_x,nn_y,nn_z,nn_xlabel,nn_ylabel,nn_title)
