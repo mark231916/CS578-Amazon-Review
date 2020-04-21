@@ -221,13 +221,13 @@ if __name__ == "__main__":
     X = X[p]
     y = y[p]
     #######logisticRegression
-    """ print('-------Train LogisticRegression ------')
+    print('-------Train LogisticRegression ------')
     lg_params={'penalty':['l1','l2', 'elasticnet'],'C':np.logspace(-3,-0.5,20)}
     lg_history=Tune_hyperparameter(LogisticRegression(solver='saga',l1_ratio=0.5),lg_params,X,y,5,thres=False)
     print('-------Plotting Hyperparameters vs Accuracy for LogisticRegression---')
     lg_x=range(len(lg_params['C']));lg_y=range(len(lg_params['penalty']));lg_z=np.array(lg_history['Accuracy'])
     lg_xlabel='C';lg_ylabel='Penalty';lg_title='Accuracy vs Hyperparameters Tuning for Logistic Regression'
-    plotting(lg_x,lg_y,lg_z,lg_xlabel,lg_ylabel,lg_title) """
+    plotting(lg_x,lg_y,lg_z,lg_xlabel,lg_ylabel,lg_title) 
     #######SVM
     print('-------Train SVM-----')
     svm_params={'kernel':['linear', 'rbf'],'thres':np.linspace(0.2,0.7,30)}
