@@ -1,0 +1,11 @@
+Libraries:
+    Numpy, scikit-learn, pandas
+Manual:
+    The dataset folder contains original data:positive/negative_review.txt and pre-processed data(X.csv and y.csv). 
+        Also, pre-trained models for running feature importance.
+    The source folder contains a ProcessingData script to pre-process raw data; 
+        main.py and feature_importance.py to run algorithms and to get results.
+    To run the program, navigate to source folder and run main.py and feature_importance.py.
+Notes on Running Time:
+    The SVM algorithm takes a really long time because of its complexity. 
+    You can comment SVM parts in main.py and feature_importance.py to save time.
