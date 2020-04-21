@@ -220,7 +220,7 @@ if __name__ == "__main__":
     p = np.random.permutation(len(y))
     X = X[p]
     y = y[p]
-    '''#######logisticRegression
+    #######logisticRegression
     print('-------Train LogisticRegression ------')
     lg_params={'penalty':['l1','l2', 'elasticnet'],'C':np.logspace(-3,-0.5,20)}
     lg_history=Tune_hyperparameter(LogisticRegression(solver='saga',l1_ratio=0.5),lg_params,X,y,5,thres=False)
@@ -235,7 +235,7 @@ if __name__ == "__main__":
     print('-------Plotting Hyperparameters vs Accuracy for SVM--')
     svm_x=range(len(svm_params['kernel']));svm_y=range(len(svm_params['thres']));svm_z=np.array(svm_history['Accuracy'])
     svm_xlabel='Kernel';svm_ylabel='Threshold';svm_title='Accuracy vs Hyperparameters for SVM'
-    plotting(svm_x,svm_y,svm_z,svm_xlabel,svm_ylabel,svm_title) '''
+    plotting(svm_x,svm_y,svm_z,svm_xlabel,svm_ylabel,svm_title)
     
     #######Batchsize
     print('-------Batchsize vs Error-----')
